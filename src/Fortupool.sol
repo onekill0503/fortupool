@@ -109,6 +109,7 @@ contract Fortupool is Ownable, VRFV2PlusWrapperConsumerBase {
         if (usdeContract.allowance(msg.sender, address(this)) < _amount) revert FORTU__ALLOWANCE_NOT_ENOUGH();
 
         usdeContract.transferFrom(msg.sender, address(this), _amount);
+        susdeContract.deposit(_amount, address(this));
         batchPools[currentBatch][msg.sender].blockNumber = block.number;
         batchPools[currentBatch][msg.sender].amount += _amount;
 
