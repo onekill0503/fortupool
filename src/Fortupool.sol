@@ -45,6 +45,7 @@ contract Fortupool is Ownable, VRFV2PlusWrapperConsumerBase {
     uint256 public PLATFORM_PERCENTAGE = 10;
     uint256 public TOTAL_FEES_COLLECTED;
     uint256 public MIN_OPERATOR_CONFIRM = 2;
+    uint256 public BLOCK_TO_TICKET_RATIO = 1000;
 
     uint256 public currentBatch;
 
@@ -66,10 +67,10 @@ contract Fortupool is Ownable, VRFV2PlusWrapperConsumerBase {
     mapping(uint256 => mapping(address => bool)) public operatorConfirm;
     mapping(uint256 => OperatorSubmit[]) public operatorSubmit;
 
-    event JoinRaffle(address wallet, uint256 amount, uint256 batch, uint256 timestamp);
-    event Withdraw(address wallet, uint256 amount, uint256 batch, uint256 timestamp);
-    event BatchLuckyNumber(uint256 batch, uint256 luckyNumber, uint256 timestamp);
-    event GenerateRandom(uint256 requestId, uint256 batch, uint256 timestamp);
+    event JoinRaffle(address wallet, uint256 amount, uint256 batch, uint256 block, uint256 timestamp);
+    event Withdraw(address wallet, uint256 amount, uint256 batch, uint256 block, uint256 timestamp);
+    event BatchLuckyNumber(uint256 batch, uint256 luckyNumber, uint256 block, uint256 timestamp);
+    event GenerateRandom(uint256 requestId, uint256 batch, uint256 block, uint256 timestamp);
 
     error FORTU__ZERO_AMOUNT();
     error FORTU__WALLET_NOT_ALLOWED(address wallet);
@@ -97,7 +98,7 @@ contract Fortupool is Ownable, VRFV2PlusWrapperConsumerBase {
         if (batchPausePeriod) revert FORTU__ON_PUASE_PERIOD();
         if (batchPools[currentBatch][msg.sender].amount == 0) revert FORTU__ZERO_AMOUNT();
 
-        emit JoinRaffle(msg.sender, batchPools[currentBatch][msg.sender].amount, currentBatch, block.timestamp);
+        emit JoinRaffle(msg.sender, batchPools[currentBatch][msg.sender].amount, currentBatch, block.number, block.timestamp);
     }
 
     function buyTicket(uint256 _amount) external {
@@ -113,7 +114,7 @@ contract Fortupool is Ownable, VRFV2PlusWrapperConsumerBase {
 
         batchTotalStacked[currentBatch] += _amount;
 
-        emit JoinRaffle(msg.sender, _amount, currentBatch, block.timestamp);
+        emit JoinRaffle(msg.sender, _amount, currentBatch, block.number, block.timestamp);
     }
 
     function withdraw(uint256 _amount) external {
@@ -127,7 +128,7 @@ contract Fortupool is Ownable, VRFV2PlusWrapperConsumerBase {
 
         batchTotalStacked[currentBatch] -= _amount;
 
-        emit Withdraw(msg.sender, _amount, currentBatch, block.timestamp);
+        emit Withdraw(msg.sender, _amount, currentBatch, block.number, block.timestamp);
     }
 
     function generateLuckyNumber() external {
@@ -141,7 +142,7 @@ contract Fortupool is Ownable, VRFV2PlusWrapperConsumerBase {
 
         randomNumbers[currentBatch].requestId = requestId;
 
-        emit GenerateRandom(requestId, currentBatch, block.timestamp);
+        emit GenerateRandom(requestId, currentBatch, block.number, block.timestamp);
         batchPausePeriod = true;
     }
 
@@ -149,7 +150,7 @@ contract Fortupool is Ownable, VRFV2PlusWrapperConsumerBase {
         randomNumbers[currentBatch].randomNums = _randomWords[0];
         randomNumbers[currentBatch].requestId = _requestId;
 
-        emit BatchLuckyNumber(currentBatch, _randomWords[0], block.timestamp);
+        emit BatchLuckyNumber(currentBatch, _randomWords[0], block.number, block.timestamp);
     }
 
     function pickWinner() external onlyOwner {
