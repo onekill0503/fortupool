@@ -166,7 +166,7 @@ contract Fortupool is Ownable, VRFV2PlusWrapperConsumerBase {
         if (!batchPausePeriod) revert FORTU__BATCH_IS_ONGOING();
         uint256 totalConfirmed = 1;
 
-        for (uint256 i = 0; i < operatorSubmit[currentBatch].length - 2; i++) {
+        for (uint256 i = 0; i <= operatorSubmit[currentBatch].length - 2; i++) {
             if (operatorSubmit[currentBatch][i].luckyNumber == operatorSubmit[currentBatch][i + 1].luckyNumber) {
                 totalConfirmed++;
             }
@@ -205,7 +205,7 @@ contract Fortupool is Ownable, VRFV2PlusWrapperConsumerBase {
         batchPausePeriod = false;
     }
 
-    function isValidOperator(address _operator) internal view returns (bool) {
+    function isValidOperator(address _operator) public view returns (bool) {
         for (uint256 i = 0; i < operatorAddress.length; i++) {
             if (operatorAddress[i] == _operator) {
                 return true;
