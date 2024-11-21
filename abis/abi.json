@@ -11,11 +11,6 @@
         "name": "_usde",
         "type": "address",
         "internalType": "address"
-      },
-      {
-        "name": "_price",
-        "type": "uint256",
-        "internalType": "uint256"
       }
     ],
     "stateMutability": "nonpayable"
@@ -230,13 +225,6 @@
   },
   {
     "type": "function",
-    "name": "distributePrize",
-    "inputs": [],
-    "outputs": [],
-    "stateMutability": "nonpayable"
-  },
-  {
-    "type": "function",
     "name": "finalWinners",
     "inputs": [
       {
@@ -434,13 +422,6 @@
   },
   {
     "type": "function",
-    "name": "pickWinner",
-    "inputs": [],
-    "outputs": [],
-    "stateMutability": "nonpayable"
-  },
-  {
-    "type": "function",
     "name": "randomNumbers",
     "inputs": [
       {
@@ -485,6 +466,19 @@
     "type": "function",
     "name": "rejoinBacth",
     "inputs": [],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "removeOperator",
+    "inputs": [
+      {
+        "name": "_operator",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
     "outputs": [],
     "stateMutability": "nonpayable"
   },
@@ -787,6 +781,11 @@
         "internalType": "uint256"
       }
     ]
+  },
+  {
+    "type": "error",
+    "name": "FORTU__PRIZE_ZERO",
+    "inputs": []
   },
   {
     "type": "error",

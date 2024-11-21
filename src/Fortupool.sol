@@ -53,8 +53,13 @@ contract Fortupool is Ownable, VRFV2PlusWrapperConsumerBase {
     ISUSDE internal susdeContract;
 
     // sepolia chainlink vrf
-    address public linkAddress = 0x779877A7B0D9E8603169DdbD7836e478b4624789;
-    address public wrapperAddress = 0x195f15F2d49d693cE265b4fB0fdDbE15b1850Cc1;
+    // address public linkAddress = 0x779877A7B0D9E8603169DdbD7836e478b4624789;
+    // base sepolia link
+    address public linkAddress = 0xE4aB69C077896252FAFBD49EFD26B5D171A32410;
+    // sepolia
+    // address public wrapperAddress = 0x195f15F2d49d693cE265b4fB0fdDbE15b1850Cc1;
+    // base sepolia
+    address public wrapperAddress = 0x7a1BaC17Ccc5b313516C5E16fb24f7659aA5ebed;
 
     bool public batchPausePeriod;
 
@@ -82,17 +87,25 @@ contract Fortupool is Ownable, VRFV2PlusWrapperConsumerBase {
     error FORTU__NOT_ENOUGH_OPERATOR_CONFIRM();
     error FORTU__BATCH_IS_ONGOING();
     error FORTU__WINNER_NOT_PICKED();
+    error FORTU__PRIZE_ZERO();
 
-    constructor(address _susde, address _usde, uint256 _price) Ownable(msg.sender) VRFV2PlusWrapperConsumerBase(wrapperAddress) {
+    constructor(address _susde, address _usde) Ownable(msg.sender) VRFV2PlusWrapperConsumerBase(wrapperAddress) {
         currentBatch = 0;
         usdeContract = IERC20(_usde);
         susdeContract = ISUSDE(_susde);
         batchPausePeriod = false;
-        TICKET_PRICE = _price;
     }
 
     function addOpertaor(address _operator) external onlyOwner {
         operatorAddress.push(_operator);
+    }
+
+    function removeOperator(address _operator) external onlyOwner {
+        for (uint256 i = 0; i < operatorAddress.length; i++) {
+            if (operatorAddress[i] == _operator) {
+                delete operatorAddress[i];
+            }
+        }
     }
 
     function updateTicketPrice(uint256 _price) external onlyOwner {
@@ -104,7 +117,9 @@ contract Fortupool is Ownable, VRFV2PlusWrapperConsumerBase {
         if (batchPausePeriod) revert FORTU__ON_PUASE_PERIOD();
         if (batchPools[currentBatch][msg.sender].amount == 0) revert FORTU__ZERO_AMOUNT();
 
-        emit JoinRaffle(msg.sender, batchPools[currentBatch][msg.sender].amount, currentBatch, block.number, block.timestamp);
+        emit JoinRaffle(
+            msg.sender, batchPools[currentBatch][msg.sender].amount, currentBatch, block.number, block.timestamp
+        );
     }
 
     function buyTicket(uint256 _amount) external {
@@ -162,22 +177,6 @@ contract Fortupool is Ownable, VRFV2PlusWrapperConsumerBase {
         emit BatchLuckyNumber(currentBatch, _randomWords[0], block.number, block.timestamp);
     }
 
-    function pickWinner() external onlyOwner {
-        if (!batchPausePeriod) revert FORTU__BATCH_IS_ONGOING();
-        uint256 totalConfirmed = 1;
-
-        for (uint256 i = 0; i <= operatorSubmit[currentBatch].length - 2; i++) {
-            if (operatorSubmit[currentBatch][i].luckyNumber == operatorSubmit[currentBatch][i + 1].luckyNumber) {
-                totalConfirmed++;
-            }
-        }
-        if (totalConfirmed < MIN_OPERATOR_CONFIRM) revert FORTU__NOT_ENOUGH_OPERATOR_CONFIRM();
-
-        finalWinners[currentBatch] = FinalWinner(
-            currentBatch, operatorSubmit[currentBatch][0].winner, operatorSubmit[currentBatch][0].luckyNumber
-        );
-    }
-
     function submitWinner(uint256 luckyNumber, address winner) external {
         if (!isValidOperator(msg.sender)) revert FORTU__WALLET_NOT_ALLOWED(msg.sender);
         if (!batchPausePeriod) revert FORTU__BATCH_IS_ONGOING();
@@ -185,21 +184,24 @@ contract Fortupool is Ownable, VRFV2PlusWrapperConsumerBase {
             revert FORTU__OPERATOR_ALREADY_SUBMIT(msg.sender, block.timestamp);
         }
 
-        operatorSubmit[currentBatch].push(OperatorSubmit(currentBatch, winner, luckyNumber));
-        operatorConfirm[currentBatch][msg.sender] = true;
+        finalWinners[currentBatch] = FinalWinner(currentBatch, winner, luckyNumber);
+
+        distributePrize(winner);
     }
 
-    function distributePrize() external onlyOwner {
-        if (!batchPausePeriod) revert FORTU__BATCH_IS_ONGOING();
-        if (finalWinners[currentBatch].winner == address(0)) revert FORTU__WINNER_NOT_PICKED();
-
+    function distributePrize(address winner) internal {
         uint256 totalUsdeCurrentBatch = batchTotalStacked[currentBatch];
-        uint256 totalsUSDe = usdeContract.balanceOf(address(this));
-        uint256 totalYieldCurrentBatch = susdeContract.previewRedeem(totalsUSDe) - totalUsdeCurrentBatch;
+        uint256 totalsUSDe = susdeContract.balanceOf(address(this));
+        uint256 redeem = susdeContract.previewRedeem(totalsUSDe);
+        uint256 totalYieldCurrentBatch = 0;
+        if (redeem > totalUsdeCurrentBatch) {
+            totalYieldCurrentBatch = redeem - totalUsdeCurrentBatch;
+        }
+        if (totalYieldCurrentBatch == 0) revert FORTU__PRIZE_ZERO();
         uint256 distributedsUSDe = susdeContract.convertToShares(totalYieldCurrentBatch);
         uint256 platformFees = (distributedsUSDe * PLATFORM_PERCENTAGE) / 100e18;
 
-        susdeContract.transfer(finalWinners[currentBatch].winner, (distributedsUSDe - platformFees));
+        susdeContract.transfer(winner, (distributedsUSDe - platformFees));
         TOTAL_FEES_COLLECTED += platformFees;
         currentBatch += 1;
         batchPausePeriod = false;

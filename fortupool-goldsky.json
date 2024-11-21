@@ -9,9 +9,9 @@
   "instances": [
     {
       "abi": "fortupool",
-      "address": "0xA3a8f41De502EDde85Ab60CE6e9b1847eb49b65e",
-      "startBlock": 7123650,
-      "chain": "sepolia"
+      "address": "0xc535711468ED0c21e4B6E0033C4852a1A0cd5848",
+      "startBlock": 18228639,
+      "chain": "base-sepolia"
     }
   ]
 }
