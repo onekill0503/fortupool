@@ -179,7 +179,7 @@ contract Fortupool is Ownable, VRFV2PlusWrapperConsumerBase {
     }
 
     function submitWinner(uint256 luckyNumber, address winner) external {
-        if (isValidOperator(msg.sender)) revert FORTU__WALLET_NOT_ALLOWED(msg.sender);
+        if (!isValidOperator(msg.sender)) revert FORTU__WALLET_NOT_ALLOWED(msg.sender);
         if (!batchPausePeriod) revert FORTU__BATCH_IS_ONGOING();
         if (operatorConfirm[currentBatch][msg.sender]) {
             revert FORTU__OPERATOR_ALREADY_SUBMIT(msg.sender, block.timestamp);
@@ -190,7 +190,7 @@ contract Fortupool is Ownable, VRFV2PlusWrapperConsumerBase {
     }
 
     function distributePrize() external onlyOwner {
-        if (batchPausePeriod) revert FORTU__BATCH_IS_ONGOING();
+        if (!batchPausePeriod) revert FORTU__BATCH_IS_ONGOING();
         if (finalWinners[currentBatch].winner == address(0)) revert FORTU__WINNER_NOT_PICKED();
 
         uint256 totalUsdeCurrentBatch = batchTotalStacked[currentBatch];
