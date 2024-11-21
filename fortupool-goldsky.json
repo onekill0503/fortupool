@@ -1,0 +1,17 @@
+{
+  "version": "1",
+  "name": "fortupool",
+  "abis": {
+    "fortupool": {
+      "path": "./abis/abi.json"
+    }
+  },
+  "instances": [
+    {
+      "abi": "fortupool",
+      "address": "0x3f5fe3E6217212dF0233cD770Ad554b9A616Df3C",
+      "startBlock": 7122375,
+      "chain": "sepolia"
+    }
+  ]
+}

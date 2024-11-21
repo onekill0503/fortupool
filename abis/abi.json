@@ -11,6 +11,11 @@
         "name": "_usde",
         "type": "address",
         "internalType": "address"
+      },
+      {
+        "name": "_price",
+        "type": "uint256",
+        "internalType": "uint256"
       }
     ],
     "stateMutability": "nonpayable"
@@ -504,6 +509,19 @@
   },
   {
     "type": "function",
+    "name": "updateTicketPrice",
+    "inputs": [
+      {
+        "name": "_price",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
     "name": "withdraw",
     "inputs": [
       {
@@ -512,6 +530,13 @@
         "internalType": "uint256"
       }
     ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "withdrawFees",
+    "inputs": [],
     "outputs": [],
     "stateMutability": "nonpayable"
   },

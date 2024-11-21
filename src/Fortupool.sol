@@ -83,15 +83,21 @@ contract Fortupool is Ownable, VRFV2PlusWrapperConsumerBase {
     error FORTU__BATCH_IS_ONGOING();
     error FORTU__WINNER_NOT_PICKED();
 
-    constructor(address _susde, address _usde) Ownable(msg.sender) VRFV2PlusWrapperConsumerBase(wrapperAddress) {
+    constructor(address _susde, address _usde, uint256 _price) Ownable(msg.sender) VRFV2PlusWrapperConsumerBase(wrapperAddress) {
         currentBatch = 0;
         usdeContract = IERC20(_usde);
         susdeContract = ISUSDE(_susde);
         batchPausePeriod = false;
+        TICKET_PRICE = _price;
     }
 
     function addOpertaor(address _operator) external onlyOwner {
         operatorAddress.push(_operator);
+    }
+
+    function updateTicketPrice(uint256 _price) external onlyOwner {
+        if (_price == 0) revert FORTU__ZERO_AMOUNT();
+        TICKET_PRICE = _price;
     }
 
     function rejoinBacth() external {
@@ -104,12 +110,14 @@ contract Fortupool is Ownable, VRFV2PlusWrapperConsumerBase {
     function buyTicket(uint256 _amount) external {
         if (_amount == 0) revert FORTU__ZERO_AMOUNT();
         if (batchPausePeriod) revert FORTU__ON_PUASE_PERIOD();
-        if (TICKET_PRICE % _amount != 0) revert FORTU__INVALID_AMOUNT();
+        if (_amount % TICKET_PRICE != 0) revert FORTU__INVALID_AMOUNT();
         if (usdeContract.balanceOf(msg.sender) < _amount) revert FORTU__UNIFFICIENT_BALANCE();
         if (usdeContract.allowance(msg.sender, address(this)) < _amount) revert FORTU__ALLOWANCE_NOT_ENOUGH();
 
         usdeContract.transferFrom(msg.sender, address(this), _amount);
+        usdeContract.approve(address(susdeContract), _amount);
         susdeContract.deposit(_amount, address(this));
+
         batchPools[currentBatch][msg.sender].blockNumber = block.number;
         batchPools[currentBatch][msg.sender].amount += _amount;
 
@@ -209,6 +217,11 @@ contract Fortupool is Ownable, VRFV2PlusWrapperConsumerBase {
     function withdrawLink() public onlyOwner {
         LinkTokenInterface link = LinkTokenInterface(linkAddress);
         require(link.transfer(msg.sender, link.balanceOf(address(this))), "Unable to transfer");
+    }
+
+    function withdrawFees() external onlyOwner {
+        susdeContract.transfer(owner(), TOTAL_FEES_COLLECTED);
+        TOTAL_FEES_COLLECTED = 0;
     }
 
     function withdrawNative(uint256 amount) external onlyOwner {
