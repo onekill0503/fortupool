@@ -32,19 +32,10 @@ contract Fortupool is Ownable, VRFV2PlusWrapperConsumerBase {
         uint256 luckyNumber;
     }
 
-    struct OperatorSubmit {
-        uint256 batch;
-        address winner;
-        uint256 luckyNumber;
-    }
-
-    uint256 public TOTAL_STACKED_BATCH;
     uint256 public TOTAL_STACKED;
-    uint256 public CURRENT_BATCH;
     uint256 public TICKET_PRICE;
     uint256 public PLATFORM_PERCENTAGE = 10;
     uint256 public TOTAL_FEES_COLLECTED;
-    uint256 public MIN_OPERATOR_CONFIRM = 2;
     uint256 public BLOCK_TO_TICKET_RATIO = 1000;
 
     uint256 public currentBatch;
@@ -70,7 +61,6 @@ contract Fortupool is Ownable, VRFV2PlusWrapperConsumerBase {
     mapping(uint256 => uint256) public batchTotalStacked;
     mapping(uint256 => FinalWinner) public finalWinners;
     mapping(uint256 => mapping(address => bool)) public operatorConfirm;
-    mapping(uint256 => OperatorSubmit[]) public operatorSubmit;
 
     event JoinRaffle(address wallet, uint256 amount, uint256 batch, uint256 block, uint256 timestamp);
     event Withdraw(address wallet, uint256 amount, uint256 batch, uint256 block, uint256 timestamp);
@@ -113,6 +103,11 @@ contract Fortupool is Ownable, VRFV2PlusWrapperConsumerBase {
         TICKET_PRICE = _price;
     }
 
+    function updateBlockToTicketRatio(uint256 _ratio) external onlyOwner {
+        if (_ratio == 0) revert FORTU__ZERO_AMOUNT();
+        BLOCK_TO_TICKET_RATIO = _ratio;
+    }
+
     function rejoinBacth() external {
         if (batchPausePeriod) revert FORTU__ON_PUASE_PERIOD();
         if (batchPools[currentBatch][msg.sender].amount == 0) revert FORTU__ZERO_AMOUNT();
@@ -138,6 +133,8 @@ contract Fortupool is Ownable, VRFV2PlusWrapperConsumerBase {
 
         batchTotalStacked[currentBatch] += _amount;
 
+        TOTAL_STACKED += _amount;
+
         emit JoinRaffle(msg.sender, _amount, currentBatch, block.number, block.timestamp);
     }
 
@@ -151,6 +148,8 @@ contract Fortupool is Ownable, VRFV2PlusWrapperConsumerBase {
         batchPools[currentBatch][msg.sender].blockNumber = block.number;
 
         batchTotalStacked[currentBatch] -= _amount;
+
+        TOTAL_STACKED -= _amount;
 
         emit Withdraw(msg.sender, _amount, currentBatch, block.number, block.timestamp);
     }
