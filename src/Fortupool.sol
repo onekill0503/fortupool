@@ -11,7 +11,7 @@ import "chainlink-brownie-contracts/contracts/src/v0.8/vrf/dev/libraries/VRFV2Pl
 
 import "./interfaces/ISUSDE.sol";
 
-contract Fortupool is Ownable, VRFV2PlusWrapperConsumerBase {
+contract FortuPool is Ownable, VRFV2PlusWrapperConsumerBase {
     uint32 callbackGasLimit = 200000;
     uint16 blockConfirmations = 10;
     uint32 numWords = 1;
@@ -125,8 +125,7 @@ contract Fortupool is Ownable, VRFV2PlusWrapperConsumerBase {
     function buyFromLZ(address _buyer, uint256 _amount) external {
         if (msg.sender != LZ_ADAPTER) revert FORTU__WALLET_NOT_ALLOWED(msg.sender);
         if (_amount == 0) revert FORTU__ZERO_AMOUNT();
-        usdeContract.transferFrom(msg.sender, address(this), _amount);;
-    
+
         uint256 refundUSDe = _amount % TICKET_PRICE;
         if (refundUSDe != 0) {
             usdeContract.transfer(_buyer, refundUSDe);
