@@ -37,6 +37,7 @@ contract Fortupool is Ownable, VRFV2PlusWrapperConsumerBase {
     uint256 public PLATFORM_PERCENTAGE = 10;
     uint256 public TOTAL_FEES_COLLECTED;
     uint256 public BLOCK_TO_TICKET_RATIO = 1000;
+    uint256 public LZ_ADAPTER = 0x6EDCE65403992e310A62460808c4b910D972f10f;
 
     uint256 public currentBatch;
 
@@ -108,6 +109,10 @@ contract Fortupool is Ownable, VRFV2PlusWrapperConsumerBase {
         BLOCK_TO_TICKET_RATIO = _ratio;
     }
 
+    function setLZAdapter(address _adapter) external onlyOwner {
+        LZ_ADAPTER = _adapter;
+    }
+    
     function rejoinBacth() external {
         if (batchPausePeriod) revert FORTU__ON_PUASE_PERIOD();
         if (batchPools[currentBatch][msg.sender].amount == 0) revert FORTU__ZERO_AMOUNT();
@@ -115,6 +120,29 @@ contract Fortupool is Ownable, VRFV2PlusWrapperConsumerBase {
         emit JoinRaffle(
             msg.sender, batchPools[currentBatch][msg.sender].amount, currentBatch, block.number, block.timestamp
         );
+    }
+
+    function buyFromLZ(address _buyer, uint256 _amount) external {
+        if (msg.sender != LZ_ADAPTER) revert FORTU__WALLET_NOT_ALLOWED(msg.sender);
+        if (_amount == 0) revert FORTU__ZERO_AMOUNT();
+        usdeContract.transferFrom(msg.sender, address(this), _amount);;
+    
+        uint256 refundUSDe = _amount % TICKET_PRICE;
+        if (refundUSDe != 0) {
+            usdeContract.transfer(_buyer, refundUSDe);
+        }
+        uint256 netAmount = (_amount - refundUSDe);
+        usdeContract.approve(address(susdeContract), netAmount);
+        susdeContract.deposit(netAmount, address(this));
+
+        batchPools[currentBatch][_buyer].blockNumber = block.number;
+        batchPools[currentBatch][_buyer].amount += _amount;
+
+        batchTotalStacked[currentBatch] += _amount;
+
+        TOTAL_STACKED += _amount;
+
+        emit JoinRaffle(_buyer, _amount, currentBatch, block.number, block.timestamp);
     }
 
     function buyTicket(uint256 _amount) external {
@@ -154,8 +182,7 @@ contract Fortupool is Ownable, VRFV2PlusWrapperConsumerBase {
         emit Withdraw(msg.sender, _amount, currentBatch, block.number, block.timestamp);
     }
 
-    function generateLuckyNumber() external {
-        if (isValidOperator(msg.sender)) revert FORTU__WALLET_NOT_ALLOWED(msg.sender);
+    function generateLuckyNumber() external onlyOwner {
 
         bytes memory extraArgs = VRFV2PlusClient._argsToBytes(VRFV2PlusClient.ExtraArgsV1({nativePayment: true}));
         uint256 requestId;
