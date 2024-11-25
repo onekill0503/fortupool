@@ -11,11 +11,6 @@
         "name": "_usde",
         "type": "address",
         "internalType": "address"
-      },
-      {
-        "name": "_price",
-        "type": "uint256",
-        "internalType": "uint256"
       }
     ],
     "stateMutability": "nonpayable"
@@ -39,26 +34,13 @@
   },
   {
     "type": "function",
-    "name": "CURRENT_BATCH",
+    "name": "FORTU_RECEIVER",
     "inputs": [],
     "outputs": [
       {
         "name": "",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "MIN_OPERATOR_CONFIRM",
-    "inputs": [],
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint256",
-        "internalType": "uint256"
+        "type": "address",
+        "internalType": "address"
       }
     ],
     "stateMutability": "view"
@@ -117,8 +99,14 @@
   },
   {
     "type": "function",
-    "name": "TOTAL_STACKED_BATCH",
-    "inputs": [],
+    "name": "activeFunds",
+    "inputs": [
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
     "outputs": [
       {
         "name": "",
@@ -204,6 +192,24 @@
   },
   {
     "type": "function",
+    "name": "buyFromLZ",
+    "inputs": [
+      {
+        "name": "_buyer",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "_amount",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
     "name": "buyTicket",
     "inputs": [
       {
@@ -227,13 +233,6 @@
       }
     ],
     "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "distributePrize",
-    "inputs": [],
-    "outputs": [],
-    "stateMutability": "nonpayable"
   },
   {
     "type": "function",
@@ -387,40 +386,6 @@
   },
   {
     "type": "function",
-    "name": "operatorSubmit",
-    "inputs": [
-      {
-        "name": "",
-        "type": "uint256",
-        "internalType": "uint256"
-      },
-      {
-        "name": "",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ],
-    "outputs": [
-      {
-        "name": "batch",
-        "type": "uint256",
-        "internalType": "uint256"
-      },
-      {
-        "name": "winner",
-        "type": "address",
-        "internalType": "address"
-      },
-      {
-        "name": "luckyNumber",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
     "name": "owner",
     "inputs": [],
     "outputs": [
@@ -431,13 +396,6 @@
       }
     ],
     "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "pickWinner",
-    "inputs": [],
-    "outputs": [],
-    "stateMutability": "nonpayable"
   },
   {
     "type": "function",
@@ -484,7 +442,26 @@
   {
     "type": "function",
     "name": "rejoinBacth",
-    "inputs": [],
+    "inputs": [
+      {
+        "name": "_fromBatch",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "removeOperator",
+    "inputs": [
+      {
+        "name": "_operator",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
     "outputs": [],
     "stateMutability": "nonpayable"
   },
@@ -492,6 +469,19 @@
     "type": "function",
     "name": "renounceOwnership",
     "inputs": [],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "setFortuReceiver",
+    "inputs": [
+      {
+        "name": "_receiver",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
     "outputs": [],
     "stateMutability": "nonpayable"
   },
@@ -528,6 +518,32 @@
   },
   {
     "type": "function",
+    "name": "updateBlockToTicketRatio",
+    "inputs": [
+      {
+        "name": "_ratio",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "updatePlatformPercentage",
+    "inputs": [
+      {
+        "name": "_percentage",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
     "name": "updateTicketPrice",
     "inputs": [
       {
@@ -545,6 +561,11 @@
     "inputs": [
       {
         "name": "_amount",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "_fromBatch",
         "type": "uint256",
         "internalType": "uint256"
       }
@@ -759,6 +780,17 @@
   },
   {
     "type": "error",
+    "name": "FORTU__FUNDS_NOT_MIGRATED",
+    "inputs": [
+      {
+        "name": "batch",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ]
+  },
+  {
+    "type": "error",
     "name": "FORTU__INVALID_AMOUNT",
     "inputs": []
   },
@@ -787,6 +819,11 @@
         "internalType": "uint256"
       }
     ]
+  },
+  {
+    "type": "error",
+    "name": "FORTU__PRIZE_ZERO",
+    "inputs": []
   },
   {
     "type": "error",
