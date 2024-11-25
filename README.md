@@ -60,59 +60,138 @@ The project consists of three main components:
    - Winner selected based on weighted probabilities by operator
    - Prizes automatically distributed by owner
 
+# Future Development Roadmap 🚀
+
+## Operator Incentivization System 💸
+
+### Operator Rewards Program
+- Implement token rewards for successful winner submissions
+- Revenue sharing model from protocol fees
+- Staking requirements for operators to ensure reliability
+- Automated operator rotation for fairness
+
+## Protocol Enhancements 🔄
+
+### Enhanced Prize Pool Mechanics
+1. **Multiple Prize Tiers**
+   - First prize: 50% of pool
+   - Second prize: 30% of pool
+   - Multiple smaller prizes: 20% of pool
+   - Increases winning chances and user engagement
+
+2. **Special Events**
+   - Milestone celebrations
+   - Partnership promotional pools
+
+### Yield Optimization
+1. **Multi-Protocol Yield Farming**
+   - Integration with multiple DeFi protocols
+   - Automated yield optimization
+   - Risk-adjusted strategy selection
+   - Higher rewards from better yield management
+
+## User Experience Improvements 🎯
+
+### Enhanced Ticket System
+1. **NFT-Based Tickets**
+   - Tradeable lottery tickets
+   - Historical winning ticket collection
+   - Special edition tickets
+   - Secondary market for tickets
+
+2. **Ticket Boosters**
+   - Loyalty multipliers
+   - Streak bonuses
+   - Friend referral boosts
+   - Community participation rewards
+
+## Protocol Expansion 🌐
+
+### Cross-Chain Enhancement
+1. **Chain-Specific Pools**
+   - Native token pools
+   - Optimized gas management
+
+## Governance & Tokenomics 🏛️
+
+### Protocol Token
+1. **Utility**
+   - Governance rights
+   - Fee sharing
+   - Boost multipliers
+   - Operator staking
+
+2. **Tokenomics**
+   - Operator rewards
+   - User incentives
+   - Protocol development
+   - Community treasury
+
+### DAO Structure
+- Protocol parameter governance
+- Strategy selection
+- Operator management
+- Treasury allocation
+
+## Security & Risk Management 🔒
+
+### Enhanced Security Features
+- Multi-sig operations
+- Time-locks for major changes
+- Emergency shutdown mechanisms
+- Regular security audits
+
+### Risk Management
+- Insurance pool
+
+## Technical Improvements 🛠️
+
+### Infrastructure
+1. **Scalability**
+   - Optimized gas usage
+   - Batch processing
+   - Performance optimization
+
+2. **Monitoring & Analytics**
+   - Advanced analytics dashboard
+   - Real-time monitoring
+   - Performance metrics
+   - Risk indicators
+
+### Smart Contract Upgrades
+- Modular contract structure
+- Upgradeable components
+- Enhanced access control
+- Optimized gas efficiency
+
+## Revenue Streams 💰
+
+### Fee Structure
+1. **Protocol Fees**
+   - Small deposit fee
+   - Yield performance fee
+   - Early withdrawal fee
+   - Premium features
+
+2. **Revenue Distribution**
+   - Operator rewards
+   - Protocol development
+   - Community treasury
+   - Token buyback/burn
+
+## Next Steps 📋
+
+### Immediate Priorities
+1. Implement operator reward system
+2. Develop multiple prize tiers
+3. Enhance yield strategies
+4. Launch governance structure
+
 ## Prerequisites 📋
 
 - [Foundry](https://github.com/foundry-rs/foundry)
 - LayerZero endpoints configuration at FortuReceiver
 - Chainlink VRF (deposit some eth on main contract)
-
-## Installation 🛠️
-
-```bash
-# Clone the repository
-git clone https://github.com/onekill0503/fortupool.git
-cd fortupool
-
-# Install Foundry dependencies
-forge install
-
-# Build contracts
-forge build
-
-# Set up environment variables
-cp .env.example .env
-# Add your configuration details to .env
-```
-
-## Usage 💡
-
-1. **Deploy Contracts**
-   ```bash
-   forge script script/Deploy.s.sol:Deploy --rpc-url <your_rpc_url> --broadcast
-   ```
-
-2. **Run Tests**
-   ```bash
-   forge test
-   ```
-
-3. **Setup Operator Service**
-   - Follow setup instructions at [fortu-operator](https://github.com/onekill0503/fortu-operator)
-   - Configure operator with deployed contract addresses
-   - Start operator service to begin monitoring for VRF events
-
-## Testing 🧪
-
-```bash
-# Run all tests
-forge test
-
-# Run specific test file
-forge test --match-path test/Fortupool.t.sol
-
-# Run tests with verbosity
-forge test -vvv
-```
 
 ## Security 🔒
 
@@ -121,14 +200,6 @@ forge test -vvv
 - Built-in delay mechanisms for large withdrawals
 - Emergency pause functionality for critical situations
 - Operator service runs with limited permissions
-
-## Contributing 🤝
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
 
 ## Related Projects 🔗
 
