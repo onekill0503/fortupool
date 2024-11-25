@@ -65,13 +65,12 @@ The project consists of three main components:
 - [Foundry](https://github.com/foundry-rs/foundry)
 - LayerZero endpoints configuration at FortuReceiver
 - Chainlink VRF (deposit some eth on main contract)
-- Rust (for running operator service)
 
 ## Installation 🛠️
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/fortupool.git
+git clone https://github.com/onekill0503/fortupool.git
 cd fortupool
 
 # Install Foundry dependencies
@@ -84,18 +83,6 @@ forge build
 cp .env.example .env
 # Add your configuration details to .env
 ```
-
-## Configuration ⚙️
-
-1. Set up environment variables in `.env`:
-   ```
-   PRIVATE_KEY=your_private_key
-   LAYERZERO_ENDPOINT=endpoint_address
-   CHAINLINK_VRF_COORDINATOR=coordinator_address
-   OPERATOR_ADDRESS=operator_contract_address
-   ```
-
-2. Configure supported chains in the network configuration file
 
 ## Usage 💡
 
