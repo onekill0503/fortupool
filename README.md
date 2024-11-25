@@ -7,8 +7,12 @@ A decentralized no-loss lottery platform where users can deposit funds, particip
 </br>
 <div>
   <img src="https://docs.layerzero.network/img/LayerZero_Logo_Black.svg" width="200" alt="LayerZero">
-  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  &nbsp;&nbsp;&nbsp;&nbsp;
   <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRuD0jFOi1zVS2l21dEJQyALuaxEXIKUma45w&s" width="200" alt="Chainlink">
+  &nbsp;&nbsp;&nbsp;&nbsp;
+  <img src="https://res.cloudinary.com/dvujqu8pe/image/upload/h_80,f_auto/v1679692494/Companies/goldsky-logo" width="200" alt="Chainlink">
+  &nbsp;&nbsp;&nbsp;&nbsp;
+  <img src="https://logovtor.com/wp-content/uploads/2020/11/openzeppelin-logo-vector.png" width="200" alt="Chainlink">
 </div>
 </center>
 
