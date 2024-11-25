@@ -7,7 +7,7 @@ import "../src/interfaces/ISUSDE.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 contract FortupoolTest is Test {
-    Fortupool public fortu;
+    FortuPool public fortu;
     ERC20 public usde;
     ISUSDE public susde;
     address usdeAddress = 0x9e06Ac052e5929744485F2D350A9b98e2F74e1A4;
@@ -24,7 +24,7 @@ contract FortupoolTest is Test {
         usde = ERC20(usdeAddress);
         susde = ISUSDE(susdeAddress);
 
-        fortu = new Fortupool(susdeAddress, usdeAddress);
+        fortu = new FortuPool(susdeAddress, usdeAddress);
         vm.stopPrank();
         // fortu = Fortupool(fortuSC);
     }
