@@ -3,11 +3,11 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import { IOAppCore } from "@layerzerolabs/oapp-evm/contracts/oapp/interfaces/IOAppCore.sol";
-import { IOAppComposer } from "@layerzerolabs/oapp-evm/contracts/oapp/interfaces/IOAppComposer.sol";
-import { OFTComposeMsgCodec } from "@layerzerolabs/oft-evm/contracts/libs/OFTComposeMsgCodec.sol";
+import {IOAppCore} from "@layerzerolabs/oapp-evm/contracts/oapp/interfaces/IOAppCore.sol";
+import {IOAppComposer} from "@layerzerolabs/oapp-evm/contracts/oapp/interfaces/IOAppComposer.sol";
+import {OFTComposeMsgCodec} from "@layerzerolabs/oft-evm/contracts/libs/OFTComposeMsgCodec.sol";
 import "./interfaces/IFortupool.sol";
-import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 /// @title FortuReceiver Contract
 /// @dev This contract will call FortuPool to buy the tiket.
@@ -18,6 +18,7 @@ contract FortuReceiver is IOAppComposer, Ownable {
     /**
      * @notice The ERC20 token that will be used to buy tickets.
      */
+
     IERC20 public usde;
     /**
      * @notice The LayerZero Endpoint address.
@@ -57,16 +58,16 @@ contract FortuReceiver is IOAppComposer, Ownable {
     /// @param /*Executor Data*/ Additional data for checking for a specific executor (unused in this mock).
     function lzCompose(
         address _oApp,
-        bytes32 /*_guid*/,
+        bytes32, /*_guid*/
         bytes calldata _message,
-        address /*Executor*/,
+        address, /*Executor*/
         bytes calldata /*Executor Data*/
     ) external payable override {
-        if(_oApp != oApp) revert FORTA_RECEIVER__INVALID_OAPP_ADDRESS(_oApp);
-        if(msg.sender != endpoint) revert FORTA_RECEIVER__NOT_ALLOWED();
+        if (_oApp != oApp) revert FORTA_RECEIVER__INVALID_OAPP_ADDRESS(_oApp);
+        if (msg.sender != endpoint) revert FORTA_RECEIVER__NOT_ALLOWED();
 
         (address _buyer, uint256 _amount) = abi.decode(OFTComposeMsgCodec.composeMsg(_message), (address, uint256));
-        
+
         usde.safeTransfer(fortuPool, _amount);
         IFortupool(fortuPool).buyFromLZ(_buyer, _amount);
     }
@@ -74,9 +75,11 @@ contract FortuReceiver is IOAppComposer, Ownable {
     function setFortuPool(address _fortu) external onlyOwner {
         fortuPool = _fortu;
     }
+
     function setUSDE(address _usde) external onlyOwner {
         usde = IERC20(_usde);
     }
+
     function setOAPP(address _oApp) external onlyOwner {
         oApp = _oApp;
     }

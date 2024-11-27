@@ -35,6 +35,7 @@ contract FortuPool is Ownable, VRFV2PlusWrapperConsumerBase {
     /**
      * @notice The RandomNum struct represents a random number for specific batch
      */
+
     struct RandomNum {
         uint256 requestId;
         uint256 randomNums;
@@ -42,6 +43,7 @@ contract FortuPool is Ownable, VRFV2PlusWrapperConsumerBase {
     /**
      * @notice The FinalWinner struct represents the final winner for specific batch
      */
+
     struct FinalWinner {
         uint256 batch;
         address winner;
@@ -129,12 +131,20 @@ contract FortuPool is Ownable, VRFV2PlusWrapperConsumerBase {
      * @notice The activeFunds represents the mapping of the active funds per user in the batch
      */
     mapping(address => ActiveFunds) public activeFunds;
-    
+
     event JoinRaffle(address wallet, uint256 amount, uint256 batch, uint256 block, uint256 timestamp);
     event Withdraw(address wallet, uint256 amount, uint256 batch, uint256 block, uint256 timestamp);
     event BatchLuckyNumber(uint256 batch, uint256 luckyNumber, uint256 block, uint256 timestamp);
     event GenerateRandom(uint256 requestId, uint256 batch, uint256 block, uint256 timestamp);
-    event DistributedPrize(uint256 batch, address winner, uint256 amount, uint256 totalTickets, uint256 luckyNumber, uint256 block, uint256 timestamp);
+    event DistributedPrize(
+        uint256 batch,
+        address winner,
+        uint256 amount,
+        uint256 totalTickets,
+        uint256 luckyNumber,
+        uint256 block,
+        uint256 timestamp
+    );
 
     error FORTU__ZERO_AMOUNT();
     error FORTU__WALLET_NOT_ALLOWED(address wallet);
@@ -164,6 +174,7 @@ contract FortuPool is Ownable, VRFV2PlusWrapperConsumerBase {
      * @notice Adds an operator to the operatorAddress list.
      * @param _operator The address of the operator.
      */
+
     function addOperator(address _operator) external onlyOwner {
         operatorAddress.push(_operator);
     }
@@ -171,6 +182,7 @@ contract FortuPool is Ownable, VRFV2PlusWrapperConsumerBase {
      * @notice Removes an operator from the operatorAddress list.
      * @param _operator The address of the operator.
      */
+
     function removeOperator(address _operator) external onlyOwner {
         for (uint256 i = 0; i < operatorAddress.length; i++) {
             if (operatorAddress[i] == _operator) {
@@ -181,6 +193,7 @@ contract FortuPool is Ownable, VRFV2PlusWrapperConsumerBase {
     /**
      * @notice function to update platform fees
      */
+
     function updatePlatformPercentage(uint256 _percentage) external onlyOwner {
         if (_percentage == 0) revert FORTU__ZERO_AMOUNT();
         PLATFORM_PERCENTAGE = _percentage;
@@ -189,6 +202,7 @@ contract FortuPool is Ownable, VRFV2PlusWrapperConsumerBase {
      * @notice updates the ticket price
      * @param _price The price of the ticket.
      */
+
     function updateTicketPrice(uint256 _price) external onlyOwner {
         if (_price == 0) revert FORTU__ZERO_AMOUNT();
         TICKET_PRICE = _price;
@@ -197,6 +211,7 @@ contract FortuPool is Ownable, VRFV2PlusWrapperConsumerBase {
      * @notice updates the ratio block to ticket
      * @param _ratio The ratio of the block to the ticket.
      */
+
     function updateBlockToTicketRatio(uint256 _ratio) external onlyOwner {
         if (_ratio == 0) revert FORTU__ZERO_AMOUNT();
         BLOCK_TO_TICKET_RATIO = _ratio;
@@ -205,12 +220,14 @@ contract FortuPool is Ownable, VRFV2PlusWrapperConsumerBase {
      * @notice update the address of Fortu contract receiver
      * @param _receiver The address of the fortu contract receiver.
      */
+
     function setFortuReceiver(address _receiver) external onlyOwner {
         FORTU_RECEIVER = _receiver;
     }
     /**
      * @notice function to user rejoin the batch if last batch was finish and user need to rejoin it
      */
+
     function rejoinBacth(uint256 _fromBatch) external {
         if (batchPausePeriod) revert FORTU__ON_PUASE_PERIOD();
         if (batchPools[_fromBatch][msg.sender].amount == 0) revert FORTU__ZERO_AMOUNT();
@@ -232,9 +249,12 @@ contract FortuPool is Ownable, VRFV2PlusWrapperConsumerBase {
      * @param _buyer The address of the buyer.
      * @param _amount The amount of usde.
      */
+
     function buyFromLZ(address _buyer, uint256 _amount) external {
         if (msg.sender != FORTU_RECEIVER) revert FORTU__WALLET_NOT_ALLOWED(msg.sender);
-        if (activeFunds[_buyer].amount > 0 && activeFunds[_buyer].batch != currentBatch) revert FORTU__FUNDS_NOT_MIGRATED(activeFunds[_buyer].amount);
+        if (activeFunds[_buyer].amount > 0 && activeFunds[_buyer].batch != currentBatch) {
+            revert FORTU__FUNDS_NOT_MIGRATED(activeFunds[_buyer].amount);
+        }
         if (_amount == 0) revert FORTU__ZERO_AMOUNT();
 
         uint256 refundUSDe = _amount % TICKET_PRICE;
@@ -262,10 +282,13 @@ contract FortuPool is Ownable, VRFV2PlusWrapperConsumerBase {
      * @notice function to user buy ticket
      * @param _amount The amount of usde to buy ticket.
      */
+
     function buyTicket(uint256 _amount) external {
         if (_amount == 0) revert FORTU__ZERO_AMOUNT();
         if (batchPausePeriod) revert FORTU__ON_PUASE_PERIOD();
-        if (activeFunds[msg.sender].amount > 0 && activeFunds[msg.sender].batch != currentBatch) revert FORTU__FUNDS_NOT_MIGRATED(activeFunds[msg.sender].amount);
+        if (activeFunds[msg.sender].amount > 0 && activeFunds[msg.sender].batch != currentBatch) {
+            revert FORTU__FUNDS_NOT_MIGRATED(activeFunds[msg.sender].amount);
+        }
 
         if (_amount % TICKET_PRICE != 0) revert FORTU__INVALID_AMOUNT();
         if (usdeContract.balanceOf(msg.sender) < _amount) revert FORTU__UNIFFICIENT_BALANCE();
@@ -291,6 +314,7 @@ contract FortuPool is Ownable, VRFV2PlusWrapperConsumerBase {
      * @notice function to user withdraw ticket
      * @param _amount The amount of usde to withdraw.
      */
+
     function withdraw(uint256 _amount, uint256 _fromBatch) external {
         if (batchPausePeriod) revert FORTU__ON_PUASE_PERIOD();
         if (batchPools[_fromBatch][msg.sender].amount < _amount) revert FORTU__UNIFFICIENT_BALANCE();
@@ -311,8 +335,8 @@ contract FortuPool is Ownable, VRFV2PlusWrapperConsumerBase {
     /**
      * @notice function to owner generate lucky number for current batch using chainlink VRF
      */
-    function generateLuckyNumber() external onlyOwner {
 
+    function generateLuckyNumber() external onlyOwner {
         bytes memory extraArgs = VRFV2PlusClient._argsToBytes(VRFV2PlusClient.ExtraArgsV1({nativePayment: true}));
         uint256 requestId;
         uint256 reqPrice;
@@ -327,6 +351,7 @@ contract FortuPool is Ownable, VRFV2PlusWrapperConsumerBase {
     /**
      * @notice function to catch chainlink callback and fulfill the random number
      */
+
     function fulfillRandomWords(uint256 _requestId, uint256[] memory _randomWords) internal override {
         randomNumbers[currentBatch].randomNums = _randomWords[0];
         randomNumbers[currentBatch].requestId = _requestId;
@@ -338,6 +363,7 @@ contract FortuPool is Ownable, VRFV2PlusWrapperConsumerBase {
      * @param luckyNumber The lucky number.
      * @param winner The address of the winner.
      */
+
     function submitWinner(uint256 luckyNumber, address winner) external {
         if (!isValidOperator(msg.sender)) revert FORTU__WALLET_NOT_ALLOWED(msg.sender);
         if (!batchPausePeriod) revert FORTU__BATCH_IS_ONGOING();
@@ -352,6 +378,7 @@ contract FortuPool is Ownable, VRFV2PlusWrapperConsumerBase {
     /**
      * @notice function to distribute current batch prize to the winner
      */
+
     function distributePrize(address winner, uint256 luckyNumber) internal {
         uint256 totalUsdeCurrentBatch = batchTotalStacked[currentBatch];
         uint256 totalsUSDe = susdeContract.balanceOf(address(this));
@@ -367,16 +394,18 @@ contract FortuPool is Ownable, VRFV2PlusWrapperConsumerBase {
         susdeContract.transfer(winner, (distributedsUSDe - platformFees));
         TOTAL_FEES_COLLECTED += platformFees;
 
-        emit DistributedPrize(currentBatch, winner, distributedsUSDe, totalUsdeCurrentBatch, luckyNumber, block.number, block.timestamp);
+        emit DistributedPrize(
+            currentBatch, winner, distributedsUSDe, totalUsdeCurrentBatch, luckyNumber, block.number, block.timestamp
+        );
 
         currentBatch += 1;
         batchPausePeriod = false;
-        
     }
     /**
      * @notice function to check if the operator is valid
      * @param _operator The address of the operator.
      */
+
     function isValidOperator(address _operator) public view returns (bool) {
         for (uint256 i = 0; i < operatorAddress.length; i++) {
             if (operatorAddress[i] == _operator) {
@@ -388,6 +417,7 @@ contract FortuPool is Ownable, VRFV2PlusWrapperConsumerBase {
     /**
      * @notice function to withdraw link token from the contract
      */
+
     function withdrawLink() public onlyOwner {
         LinkTokenInterface link = LinkTokenInterface(linkAddress);
         require(link.transfer(msg.sender, link.balanceOf(address(this))), "Unable to transfer");
@@ -395,6 +425,7 @@ contract FortuPool is Ownable, VRFV2PlusWrapperConsumerBase {
     /**
      * @notice function to withdraw platform fees from the contract
      */
+
     function withdrawFees() external onlyOwner {
         susdeContract.transfer(owner(), TOTAL_FEES_COLLECTED);
         TOTAL_FEES_COLLECTED = 0;
@@ -403,6 +434,7 @@ contract FortuPool is Ownable, VRFV2PlusWrapperConsumerBase {
      * @notice function to withdraw native token from the contract
      * @param amount The amount of native token.
      */
+
     function withdrawNative(uint256 amount) external onlyOwner {
         (bool success,) = payable(owner()).call{value: amount}("");
         // solhint-disable-next-line gas-custom-errors
@@ -411,12 +443,13 @@ contract FortuPool is Ownable, VRFV2PlusWrapperConsumerBase {
     /**
      * @notice function to get the prize pool current batch
      */
+
     function getPrizePool() external view returns (uint256) {
         uint256 totalsUSDe = susdeContract.balanceOf(address(this));
         uint256 redeem = susdeContract.previewRedeem(totalsUSDe);
         uint256 totalUsdeCurrentBatch = batchTotalStacked[currentBatch];
         uint256 totalYieldCurrentBatch = 0;
-        if(totalUsdeCurrentBatch == 0) return 0;
+        if (totalUsdeCurrentBatch == 0) return 0;
         if (redeem > totalUsdeCurrentBatch) {
             totalYieldCurrentBatch = redeem - totalUsdeCurrentBatch;
         }
