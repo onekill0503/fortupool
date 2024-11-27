@@ -109,7 +109,12 @@
     ],
     "outputs": [
       {
-        "name": "",
+        "name": "batch",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "amount",
         "type": "uint256",
         "internalType": "uint256"
       }
@@ -118,7 +123,7 @@
   },
   {
     "type": "function",
-    "name": "addOpertaor",
+    "name": "addOperator",
     "inputs": [
       {
         "name": "_operator",
@@ -292,6 +297,19 @@
         "name": "",
         "type": "address",
         "internalType": "contract LinkTokenInterface"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getPrizePool",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
       }
     ],
     "stateMutability": "view"
@@ -619,6 +637,55 @@
     "inputs": [
       {
         "name": "batch",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      },
+      {
+        "name": "luckyNumber",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      },
+      {
+        "name": "block",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      },
+      {
+        "name": "timestamp",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "DistributedPrize",
+    "inputs": [
+      {
+        "name": "batch",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      },
+      {
+        "name": "winner",
+        "type": "address",
+        "indexed": false,
+        "internalType": "address"
+      },
+      {
+        "name": "amount",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      },
+      {
+        "name": "totalTickets",
         "type": "uint256",
         "indexed": false,
         "internalType": "uint256"

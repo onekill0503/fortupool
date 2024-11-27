@@ -48,6 +48,11 @@ contract FortuPool is Ownable, VRFV2PlusWrapperConsumerBase {
         uint256 luckyNumber;
     }
 
+    struct ActiveFunds {
+        uint256 batch;
+        uint256 amount;
+    }
+
     /**
      * @notice The TOTAL_STACKED represents the total amount of USDe stacked in the pool
      */
@@ -123,12 +128,13 @@ contract FortuPool is Ownable, VRFV2PlusWrapperConsumerBase {
     /**
      * @notice The activeFunds represents the mapping of the active funds per user in the batch
      */
-    mapping(address => uint256) public activeFunds;
+    mapping(address => ActiveFunds) public activeFunds;
     
     event JoinRaffle(address wallet, uint256 amount, uint256 batch, uint256 block, uint256 timestamp);
     event Withdraw(address wallet, uint256 amount, uint256 batch, uint256 block, uint256 timestamp);
     event BatchLuckyNumber(uint256 batch, uint256 luckyNumber, uint256 block, uint256 timestamp);
     event GenerateRandom(uint256 requestId, uint256 batch, uint256 block, uint256 timestamp);
+    event DistributedPrize(uint256 batch, address winner, uint256 amount, uint256 totalTickets, uint256 luckyNumber, uint256 block, uint256 timestamp);
 
     error FORTU__ZERO_AMOUNT();
     error FORTU__WALLET_NOT_ALLOWED(address wallet);
@@ -158,7 +164,7 @@ contract FortuPool is Ownable, VRFV2PlusWrapperConsumerBase {
      * @notice Adds an operator to the operatorAddress list.
      * @param _operator The address of the operator.
      */
-    function addOpertaor(address _operator) external onlyOwner {
+    function addOperator(address _operator) external onlyOwner {
         operatorAddress.push(_operator);
     }
     /**
@@ -209,7 +215,8 @@ contract FortuPool is Ownable, VRFV2PlusWrapperConsumerBase {
         if (batchPausePeriod) revert FORTU__ON_PUASE_PERIOD();
         if (batchPools[_fromBatch][msg.sender].amount == 0) revert FORTU__ZERO_AMOUNT();
 
-        activeFunds[msg.sender] += currentBatch;
+        activeFunds[msg.sender].batch = currentBatch;
+        activeFunds[msg.sender].amount = batchPools[_fromBatch][msg.sender].amount;
 
         batchPools[currentBatch][msg.sender].amount += batchPools[_fromBatch][msg.sender].amount;
         batchPools[currentBatch][msg.sender].blockNumber = batchPools[_fromBatch][msg.sender].blockNumber;
@@ -227,7 +234,7 @@ contract FortuPool is Ownable, VRFV2PlusWrapperConsumerBase {
      */
     function buyFromLZ(address _buyer, uint256 _amount) external {
         if (msg.sender != FORTU_RECEIVER) revert FORTU__WALLET_NOT_ALLOWED(msg.sender);
-        if (activeFunds[_buyer] > 0 && activeFunds[_buyer] != currentBatch) revert FORTU__FUNDS_NOT_MIGRATED(activeFunds[_buyer]);
+        if (activeFunds[_buyer].amount > 0 && activeFunds[_buyer].batch != currentBatch) revert FORTU__FUNDS_NOT_MIGRATED(activeFunds[_buyer].amount);
         if (_amount == 0) revert FORTU__ZERO_AMOUNT();
 
         uint256 refundUSDe = _amount % TICKET_PRICE;
@@ -244,7 +251,8 @@ contract FortuPool is Ownable, VRFV2PlusWrapperConsumerBase {
 
         batchTotalStacked[currentBatch] += _amount;
 
-        activeFunds[msg.sender] += currentBatch;
+        activeFunds[_buyer].batch = currentBatch;
+        activeFunds[_buyer].amount += _amount;
 
         TOTAL_STACKED += _amount;
 
@@ -257,7 +265,7 @@ contract FortuPool is Ownable, VRFV2PlusWrapperConsumerBase {
     function buyTicket(uint256 _amount) external {
         if (_amount == 0) revert FORTU__ZERO_AMOUNT();
         if (batchPausePeriod) revert FORTU__ON_PUASE_PERIOD();
-        if (activeFunds[msg.sender] > 0 && activeFunds[msg.sender] != currentBatch) revert FORTU__FUNDS_NOT_MIGRATED(activeFunds[msg.sender]);
+        if (activeFunds[msg.sender].amount > 0 && activeFunds[msg.sender].batch != currentBatch) revert FORTU__FUNDS_NOT_MIGRATED(activeFunds[msg.sender].amount);
 
         if (_amount % TICKET_PRICE != 0) revert FORTU__INVALID_AMOUNT();
         if (usdeContract.balanceOf(msg.sender) < _amount) revert FORTU__UNIFFICIENT_BALANCE();
@@ -272,7 +280,8 @@ contract FortuPool is Ownable, VRFV2PlusWrapperConsumerBase {
 
         batchTotalStacked[currentBatch] += _amount;
 
-        activeFunds[msg.sender] += currentBatch;
+        activeFunds[msg.sender].batch = currentBatch;
+        activeFunds[msg.sender].amount += _amount;
 
         TOTAL_STACKED += _amount;
 
@@ -292,7 +301,8 @@ contract FortuPool is Ownable, VRFV2PlusWrapperConsumerBase {
         batchPools[_fromBatch][msg.sender].blockNumber = block.number;
 
         batchTotalStacked[_fromBatch] -= _amount;
-        activeFunds[msg.sender] += 0;
+        activeFunds[msg.sender].batch = currentBatch;
+        activeFunds[msg.sender].amount -= _amount;
 
         TOTAL_STACKED -= _amount;
 
@@ -337,12 +347,12 @@ contract FortuPool is Ownable, VRFV2PlusWrapperConsumerBase {
 
         finalWinners[currentBatch] = FinalWinner(currentBatch, winner, luckyNumber);
 
-        distributePrize(winner);
+        distributePrize(winner, luckyNumber);
     }
     /**
      * @notice function to distribute current batch prize to the winner
      */
-    function distributePrize(address winner) internal {
+    function distributePrize(address winner, uint256 luckyNumber) internal {
         uint256 totalUsdeCurrentBatch = batchTotalStacked[currentBatch];
         uint256 totalsUSDe = susdeContract.balanceOf(address(this));
         uint256 redeem = susdeContract.previewRedeem(totalsUSDe);
@@ -357,8 +367,11 @@ contract FortuPool is Ownable, VRFV2PlusWrapperConsumerBase {
         susdeContract.transfer(winner, (distributedsUSDe - platformFees));
         TOTAL_FEES_COLLECTED += platformFees;
 
+        emit DistributedPrize(currentBatch, winner, distributedsUSDe, totalUsdeCurrentBatch, luckyNumber, block.number, block.timestamp);
+
         currentBatch += 1;
         batchPausePeriod = false;
+        
     }
     /**
      * @notice function to check if the operator is valid
@@ -394,6 +407,20 @@ contract FortuPool is Ownable, VRFV2PlusWrapperConsumerBase {
         (bool success,) = payable(owner()).call{value: amount}("");
         // solhint-disable-next-line gas-custom-errors
         require(success, "withdrawNative failed");
+    }
+    /**
+     * @notice function to get the prize pool current batch
+     */
+    function getPrizePool() external view returns (uint256) {
+        uint256 totalsUSDe = susdeContract.balanceOf(address(this));
+        uint256 redeem = susdeContract.previewRedeem(totalsUSDe);
+        uint256 totalUsdeCurrentBatch = batchTotalStacked[currentBatch];
+        uint256 totalYieldCurrentBatch = 0;
+        if(totalUsdeCurrentBatch == 0) return 0;
+        if (redeem > totalUsdeCurrentBatch) {
+            totalYieldCurrentBatch = redeem - totalUsdeCurrentBatch;
+        }
+        return totalYieldCurrentBatch;
     }
 
     receive() external payable {}
