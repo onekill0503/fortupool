@@ -382,11 +382,13 @@ contract FortuPool is Ownable, VRFV2PlusWrapperConsumerBase {
 
     function distributePrize(address winner, uint256 luckyNumber) internal {
         uint256 totalUsdeCurrentBatch = batchTotalStacked[currentBatch];
+        uint256 lastBatchTotalStacked = currentBatch > 1 ? batchTotalStacked[currentBatch - 1] : 0;
+        uint256 finalTotalStacked = totalUsdeCurrentBatch + lastBatchTotalStacked;
         uint256 totalsUSDe = susdeContract.balanceOf(address(this));
         uint256 redeem = susdeContract.previewRedeem(totalsUSDe);
         uint256 totalYieldCurrentBatch = 0;
-        if (redeem > totalUsdeCurrentBatch) {
-            totalYieldCurrentBatch = redeem - totalUsdeCurrentBatch;
+        if (redeem > finalTotalStacked) {
+            totalYieldCurrentBatch = redeem - finalTotalStacked;
         }
         if (totalYieldCurrentBatch == 0) revert FORTU__PRIZE_ZERO();
         uint256 distributedsUSDe = susdeContract.convertToShares(totalYieldCurrentBatch);
