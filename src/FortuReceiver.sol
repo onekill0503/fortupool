@@ -71,10 +71,14 @@ contract FortuReceiver is IOAppComposer, Ownable {
         usde.safeTransfer(fortuPool, _amount);
         IFortupool(fortuPool).buyFromLZ(_buyer, _amount);
     }
-
+    /**
+     * @notice Sets the address of the FortuPool contract.
+     * @param _fortu The address of the FortuPool contract.
+     */
     function setFortuPool(address _fortu) external onlyOwner {
         fortuPool = _fortu;
     }
+<<<<<<< Updated upstream
 
     function setUSDE(address _usde) external onlyOwner {
         usde = IERC20(_usde);
@@ -84,3 +88,29 @@ contract FortuReceiver is IOAppComposer, Ownable {
         oApp = _oApp;
     }
 }
+=======
+    /**
+     * @notice Sets the address of the ERC20 token that will be used to buy tickets.
+     * @param _usde The address of the ERC20 token that will be used to buy tickets.
+     */
+    function setUSDE(address _usde) external onlyOwner {
+        usde = IERC20(_usde);
+    }
+    /**
+     * @notice Sets the address of the OApp that is sending the composed message.
+     * @param _oApp The address of the OApp that is sending the composed message.
+     */
+    function setOAPP(address _oApp) external onlyOwner {
+        oApp = _oApp;
+    }
+    /**
+     * @notice Composes the message to be sent to the FortuPool contract.
+     * @param _buyer The address of the buyer.
+     * @param _amount The amount of tokens to be sent.
+     * @return The encoded message content.
+     */
+    function composeMessage(address _buyer, uint256 _amount) external view returns (bytes memory) {
+        return abi.encode(_buyer, _amount);
+    }
+}
+>>>>>>> Stashed changes
