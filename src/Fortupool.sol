@@ -66,7 +66,7 @@ contract FortuPool is Ownable, VRFV2PlusWrapperConsumerBase {
     /**
      * @notice The PLATFORM_PERCENTAGE represents the percentage of the platform fees (10%)
      */
-    uint256 public PLATFORM_PERCENTAGE = 10;
+    uint256 public PLATFORM_PERCENTAGE = 10e18;
     /**
      * @notice The TOTAL_FEES_COLLECTED represents the total amount of fees collected
      */
@@ -239,6 +239,7 @@ contract FortuPool is Ownable, VRFV2PlusWrapperConsumerBase {
         batchPools[currentBatch][msg.sender].blockNumber = batchPools[_fromBatch][msg.sender].blockNumber;
 
         batchTotalStacked[currentBatch] += batchPools[_fromBatch][msg.sender].amount;
+        batchTotalStacked[currentBatch - 1] -= batchPools[_fromBatch][msg.sender].amount;
 
         emit JoinRaffle(
             msg.sender, batchPools[_fromBatch][msg.sender].amount, currentBatch, block.number, block.timestamp
@@ -392,11 +393,17 @@ contract FortuPool is Ownable, VRFV2PlusWrapperConsumerBase {
         uint256 platformFees = (distributedsUSDe * PLATFORM_PERCENTAGE) / 100e18;
 
         susdeContract.transfer(winner, (distributedsUSDe - platformFees));
+        susdeContract.transfer(owner(), platformFees);
+
         TOTAL_FEES_COLLECTED += platformFees;
 
         emit DistributedPrize(
             currentBatch, winner, distributedsUSDe, totalUsdeCurrentBatch, luckyNumber, block.number, block.timestamp
         );
+
+        if(currentBatch > 1 && batchTotalStacked[currentBatch - 1] > 0) {
+            batchTotalStacked[currentBatch] += batchTotalStacked[currentBatch - 1];
+        }
 
         currentBatch += 1;
         batchPausePeriod = false;
@@ -423,14 +430,6 @@ contract FortuPool is Ownable, VRFV2PlusWrapperConsumerBase {
         require(link.transfer(msg.sender, link.balanceOf(address(this))), "Unable to transfer");
     }
     /**
-     * @notice function to withdraw platform fees from the contract
-     */
-
-    function withdrawFees() external onlyOwner {
-        susdeContract.transfer(owner(), TOTAL_FEES_COLLECTED);
-        TOTAL_FEES_COLLECTED = 0;
-    }
-    /**
      * @notice function to withdraw native token from the contract
      * @param amount The amount of native token.
      */
@@ -448,10 +447,12 @@ contract FortuPool is Ownable, VRFV2PlusWrapperConsumerBase {
         uint256 totalsUSDe = susdeContract.balanceOf(address(this));
         uint256 redeem = susdeContract.previewRedeem(totalsUSDe);
         uint256 totalUsdeCurrentBatch = batchTotalStacked[currentBatch];
+        uint256 lastBatchTotalStacked = currentBatch > 1 ? batchTotalStacked[currentBatch - 1] : 0;
+        uint256 finalTotalStacked = totalUsdeCurrentBatch + lastBatchTotalStacked;
         uint256 totalYieldCurrentBatch = 0;
         if (totalUsdeCurrentBatch == 0) return 0;
-        if (redeem > totalUsdeCurrentBatch) {
-            totalYieldCurrentBatch = redeem - totalUsdeCurrentBatch;
+        if (redeem > finalTotalStacked) {
+            totalYieldCurrentBatch = redeem - finalTotalStacked;
         }
         return totalYieldCurrentBatch;
     }

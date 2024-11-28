@@ -593,13 +593,6 @@
   },
   {
     "type": "function",
-    "name": "withdrawFees",
-    "inputs": [],
-    "outputs": [],
-    "stateMutability": "nonpayable"
-  },
-  {
-    "type": "function",
     "name": "withdrawLink",
     "inputs": [],
     "outputs": [],
