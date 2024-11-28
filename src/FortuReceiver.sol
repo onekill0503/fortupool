@@ -78,17 +78,6 @@ contract FortuReceiver is IOAppComposer, Ownable {
     function setFortuPool(address _fortu) external onlyOwner {
         fortuPool = _fortu;
     }
-<<<<<<< Updated upstream
-
-    function setUSDE(address _usde) external onlyOwner {
-        usde = IERC20(_usde);
-    }
-
-    function setOAPP(address _oApp) external onlyOwner {
-        oApp = _oApp;
-    }
-}
-=======
     /**
      * @notice Sets the address of the ERC20 token that will be used to buy tickets.
      * @param _usde The address of the ERC20 token that will be used to buy tickets.
@@ -113,4 +102,3 @@ contract FortuReceiver is IOAppComposer, Ownable {
         return abi.encode(_buyer, _amount);
     }
 }
->>>>>>> Stashed changes
