@@ -94,21 +94,6 @@ The project consists of three main components:
    - Risk-adjusted strategy selection
    - Higher rewards from better yield management
 
-## User Experience Improvements 🎯
-
-### Enhanced Ticket System
-1. **NFT-Based Tickets**
-   - Tradeable lottery tickets
-   - Historical winning ticket collection
-   - Special edition tickets
-   - Secondary market for tickets
-
-2. **Ticket Boosters**
-   - Loyalty multipliers
-   - Streak bonuses
-   - Friend referral boosts
-   - Community participation rewards
-
 ## Protocol Expansion 🌐
 
 ### Cross-Chain Enhancement
@@ -174,8 +159,6 @@ The project consists of three main components:
 1. **Protocol Fees**
    - Small deposit fee
    - Yield performance fee
-   - Early withdrawal fee
-   - Premium features
 
 2. **Revenue Distribution**
    - Operator rewards
