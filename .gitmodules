@@ -13,3 +13,11 @@
 [submodule "lib/LayerZero"]
 	path = lib/LayerZero
 	url = https://github.com/LayerZero-Labs/LayerZero
+[submodule "operator"]
+	path = operator
+	url = https://github.com/onekill0503/fortu-operator
+	branch = master
+[submodule "frontend"]
+	path = frontend
+	url = https://github.com/onekill0503/fortu-fe
+	branch = master
