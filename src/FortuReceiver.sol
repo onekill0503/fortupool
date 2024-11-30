@@ -41,7 +41,12 @@ contract FortuReceiver is IOAppComposer, Ownable {
     /// @param _erc20 The address of the ERC20 token that will be used in swaps.
     /// @param _endpoint LayerZero Endpoint address
     /// @param _oApp The address of the OApp that is sending the composed message.
-    constructor(address _erc20, address _endpoint, address _oApp, address _fortu) Ownable(msg.sender) {
+    constructor(
+        address _erc20,
+        address _endpoint,
+        address _oApp,
+        address _fortu
+    ) Ownable(msg.sender) {
         usde = IERC20(_erc20);
         endpoint = _endpoint;
         oApp = _oApp;
@@ -58,19 +63,27 @@ contract FortuReceiver is IOAppComposer, Ownable {
     /// @param /*Executor Data*/ Additional data for checking for a specific executor (unused in this mock).
     function lzCompose(
         address _oApp,
-        bytes32, /*_guid*/
+        bytes32 /*_guid*/,
         bytes calldata _message,
-        address, /*Executor*/
+        address /*Executor*/,
         bytes calldata /*Executor Data*/
     ) external payable override {
         if (_oApp != oApp) revert FORTA_RECEIVER__INVALID_OAPP_ADDRESS(_oApp);
         if (msg.sender != endpoint) revert FORTA_RECEIVER__NOT_ALLOWED();
 
-        (address _buyer, uint256 _amount) = abi.decode(OFTComposeMsgCodec.composeMsg(_message), (address, uint256));
+        (address _buyer, uint256 _amount) = abi.decode(
+            OFTComposeMsgCodec.composeMsg(_message),
+            (address, uint256)
+        );
 
-        usde.safeTransfer(fortuPool, _amount);
-        IFortupool(fortuPool).buyFromLZ(_buyer, _amount);
+        usde.approve(fortuPool, _amount);
+        try IFortupool(fortuPool).buyFromLZ(_buyer, _amount) {} catch {
+            // Rollback: Transfer USDE back to the buyer and revoke approval
+            usde.approve(fortuPool, 0);
+            usde.safeTransfer(_buyer, _amount);
+        }
     }
+
     /**
      * @notice Sets the address of the FortuPool contract.
      * @param _fortu The address of the FortuPool contract.
@@ -78,6 +91,7 @@ contract FortuReceiver is IOAppComposer, Ownable {
     function setFortuPool(address _fortu) external onlyOwner {
         fortuPool = _fortu;
     }
+
     /**
      * @notice Sets the address of the ERC20 token that will be used to buy tickets.
      * @param _usde The address of the ERC20 token that will be used to buy tickets.
@@ -85,6 +99,7 @@ contract FortuReceiver is IOAppComposer, Ownable {
     function setUSDE(address _usde) external onlyOwner {
         usde = IERC20(_usde);
     }
+
     /**
      * @notice Sets the address of the OApp that is sending the composed message.
      * @param _oApp The address of the OApp that is sending the composed message.
@@ -92,13 +107,27 @@ contract FortuReceiver is IOAppComposer, Ownable {
     function setOAPP(address _oApp) external onlyOwner {
         oApp = _oApp;
     }
+
     /**
      * @notice Composes the message to be sent to the FortuPool contract.
      * @param _buyer The address of the buyer.
      * @param _amount The amount of tokens to be sent.
      * @return The encoded message content.
      */
-    function composeMessage(address _buyer, uint256 _amount) external view returns (bytes memory) {
+    function composeMessage(
+        address _buyer,
+        uint256 _amount
+    ) external view returns (bytes memory) {
         return abi.encode(_buyer, _amount);
+    }
+
+    /**
+     * @notice Withdraws the specified amount of USDE tokens to the specified address.
+     * @notice this function is for transfer user usde who stuck in the contract cause revert function
+     * @param _amount The amount of USDE tokens to be withdrawn.
+     * @param _to The address to which the USDE tokens will be sent.
+     */
+    function withdrawUSDE(uint256 _amount, address _to) external onlyOwner {
+        usde.safeTransfer(_to, _amount);
     }
 }

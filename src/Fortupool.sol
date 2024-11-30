@@ -264,6 +264,8 @@ contract FortuPool is Ownable, VRFV2PlusWrapperConsumerBase {
         }
 
         uint256 netAmount = (_amount - refundUSDe);
+
+        usdeContract.transferFrom(msg.sender, address(this), _amount);
         usdeContract.approve(address(susdeContract), netAmount);
         susdeContract.deposit(netAmount, address(this));
 
